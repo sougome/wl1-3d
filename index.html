@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>WL1原走法3D图 — 开关1一间房 · 开关2/3一间房 · 开关1带两灯 · 灯2双控 · N/PE走开关链</title>
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --panel2:#efe9dc; --ink:#1d2320; --muted:#5c665f;
+  --line:#d8d0bd; --accent:#b45309; --accent2:#0f766e;
+  --red:#dc2626; --blue:#2563eb; --pe:#84a400;
+  --ok:#15803d; --warn:#b45309;
+  --radius:14px;
+  --font:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141816; --panel:#1e2421; --panel2:#252d29; --ink:#eef2ee; --muted:#a9b5ac; --line:#39423c; --accent:#f59e0b; --accent2:#2dd4bf; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.65}
+a{color:var(--accent2)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 48px}
+.top{padding:22px 4px 8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
+h1{font-size:clamp(26px,4.5vw,40px);line-height:1.15;margin:8px 0 10px;font-weight:800;letter-spacing:-.02em}
+.lede{font-size:16px;color:var(--muted);max-width:860px;margin:0}
+.lede strong{color:var(--ink)}
+.keyline{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.dot.r{background:var(--red)} .dot.b{background:var(--blue)} .dot.p{background:linear-gradient(90deg,#eab308 50%,#65a30d 50%)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 10px}
+button{font-family:var(--font);cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600}
+button:hover{border-color:var(--accent)}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.sw1.on{background:var(--red);border-color:var(--red);color:#fff}
+button.sw2.on{background:#ea580c;border-color:#ea580c;color:#fff}
+button.sw3.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.stage{background:#101613;border-radius:18px;overflow:hidden;border:1px solid var(--line);position:relative}
+#scene{width:100%;height:560px;display:block;touch-action:none}
+@media(max-width:640px){#scene{height:440px}}
+.fallback{display:none;padding:36px 22px;color:#fde68a;font-size:15px;line-height:1.7}
+.hintbar{display:flex;flex-wrap:wrap;gap:6px 16px;background:var(--panel2);border:1px solid var(--line);border-top:none;border-radius:0 0 18px 18px;padding:10px 14px;font-size:13px;color:var(--muted);margin-top:-18px;position:relative;z-index:2}
+.statebar{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.lampstate{flex:1 1 170px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.bulb{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:18px;background:var(--panel2);flex:none}
+.lampstate.lit .bulb{background:#fef08a;border-color:#eab308;box-shadow:0 0 18px rgba(234,179,8,.55)}
+.lampstate b{font-size:15px} .lampstate span{display:block;font-size:12.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.card h2{font-size:18px;margin:0 0 6px} .card h3{font-size:15px;margin:16px 0 6px}
+.card p,.card li{font-size:14.5px;color:var(--muted)} .card p strong,.card li strong{color:var(--ink)}
+.card ul,.card ol{margin:6px 0;padding-left:20px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;color:var(--muted);font-weight:700}
+td code{font-family:var(--mono);font-size:12.5px}
+.wire{font-weight:700;white-space:nowrap}.w-r{color:var(--red)}.w-b{color:var(--blue)}.w-p{color:var(--pe)}.w-o{color:#ea580c}.w-t1{color:#f97316}.w-t2{color:#a855f7}
+.callout{border-left:4px solid var(--accent);background:var(--panel2);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14.5px;margin-top:12px}
+.callout.good{border-color:var(--ok)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media(max-width:560px){.compare{grid-template-columns:1fr}}
+.cmp{border:1px solid var(--line);border-radius:10px;padding:12px}
+.cmp.bad{opacity:.75} .cmp b{font-size:14px}
+.cmp .n{font-family:var(--mono);font-size:26px;font-weight:800;display:block;line-height:1.1}
+.foot{font-size:13px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.kbd{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.diagram-card{margin-top:16px;border-color:var(--accent)}
+.diagram-card .dhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px}
+.diagram-card .dhead h2{margin:0}
+.dstatus{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.dstatus.lit{background:#fef08a;border-color:#eab308;color:#713f12}
+@media (prefers-color-scheme: dark){ .dstatus.lit{color:#422006} }
+.dfig{display:none;margin-top:10px}
+.dfig.show{display:block}
+.dfig svg{width:100%;height:auto;display:block;background:#fbf8f0;border:1px solid var(--line);border-radius:10px}
+@media (prefers-color-scheme: dark){ .dfig svg{background:#22271f} }
+.dnotes{font-size:14.5px;color:var(--muted);margin-top:10px}
+.dnotes strong{color:var(--ink)}
+/* Web version: desktop + phone — prevent sideways scroll, keep controls tappable */
+html,body{overflow-x:hidden}
+.wrap{width:100%}
+.toolbar button{min-height:44px}
+.dfig svg{max-width:100%}
+table td,table th{overflow-wrap:anywhere}
+.wire{white-space:normal}
+@media(max-width:640px){
+  .wrap{padding:12px 10px 36px}
+  .toolbar{gap:6px}
+  .toolbar button{flex:1 1 calc(50% - 6px);font-size:13.5px;padding:8px 10px}
+  .keyline{gap:6px}
+  .chip{font-size:12.5px;padding:5px 10px}
+  table{font-size:13px}
+  th,td{padding:7px 6px}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">ALss1 · WL1 照明回路 · 两间房布局 · 原走法 · 开关 1 带两灯 · 灯 2 两地双控</div>
+    <h1>开关 1 一间房，开关 2、3 一间房；按原走法走线</h1>
+    <p class="lede">这一版按房间摆、按<strong>原走法</strong>走线，不做灯盒串联：<strong>开关 1 单独在房间一</strong>，管房间一的灯 1 和新增灯（并联、同开同关）；<strong>开关 2、开关 3 在房间二</strong>，两地双控房间二的灯 2。每组灯的火线、零线、地线<strong>同管走</strong>：灯 2 的 <strong>N、PE 跟着开关链走</strong>——经 C 段到开关 2 盒、经 E 段到开关 3 盒、再经 B2 段到灯 2 盒，不从灯盒那边绕。根数按原走法：A 段 <strong>3 根</strong>，B1 段 <strong>3 根</strong>，D 段 <strong>3 根</strong>，C 段 <strong>3 根（L、N、PE）</strong>，E 段 <strong>4 根（T1、T2、N、PE）</strong>，B2 段 <strong>3 根（L2′、N、PE）</strong>，共 <strong>6 段管、无 F 段</strong>，灯 1 盒与新增灯盒只在开关 1 这一组内过线，不与灯 2 盒相连。进线走法不变：电箱下口出 → 地面 → 上墙 → 开关 1 盒下口进、上口出；两个开关不在同一间房，C 段默认走地面。<strong>点任意一个开关（按钮或 3D 里的面板），灯会亮灭，下方同步显示那个盒子的接线图。</strong></p>
+    <div class="keyline">
+      <span class="chip">系统图原值 · WL1：C16A/2P + RCD 30mA</span>
+      <span class="chip">WDZB1-BYJ-3×2.5 · JDG20 · 进线 FC 地面 / 墙内 WC / 顶板 CC</span>
+      <span class="chip">灯 2 双控 · 联络线 <span class="wire w-t1">T1</span> / <span class="wire w-t2">T2</span></span>
+      <span class="chip"><span class="dot r"></span> L 火线</span>
+      <span class="chip"><span class="dot b"></span> N 零线</span>
+      <span class="chip"><span class="dot p"></span> PE 地线（黄绿）</span>
+    </div>
+  </header>
+
+  <div class="toolbar" role="group" aria-label="3D 控制">
+    <button id="btnSw1" class="sw1" type="button">开关 1 · 灯 1 + 新增灯（看接线图）</button>
+    <button id="btnSw2" class="sw2" type="button">开关 2 · 双控灯 2（看接线图）</button>
+    <button id="btnSw3" class="sw3" type="button">开关 3 · 双控灯 2（看接线图）</button>
+    <button id="btnLampFig" type="button">灯 1 盒过线图</button>
+    <button id="btnFlow" class="on" type="button">电流流动</button>
+    <button id="btnXray" class="on" type="button">管内电线</button>
+    <button id="btnZoomBox" type="button">放大开关 1 盒内部</button>
+    <button id="btnZoomBox2" type="button">放大开关 2 盒内部</button>
+    <button id="btnZoomBox3" type="button">放大开关 3 盒内部</button>
+    <button id="btnCNear" type="button">C 段：同一面墙 · 墙内直拉</button>
+    <button id="btnCFar" class="on" type="button">C 段：不在同一面墙 · 走地面</button>
+    <button id="btnReset" type="button">复位视角</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="scene" aria-label="WL1 三维示意图：电箱、三个开关盒与三盏灯及线管，开关1带两灯，灯2两地双控"></canvas>
+    <div class="fallback" id="fallback">3D 库这次没加载成功（需要网络加载 Three.js）。下面的分段表和各盒接线图是完整的，刷新一次通常就能看到 3D 模型；点上方开关按钮仍可切换灯的状态并显示对应接线图。</div>
+  </div>
+  <div class="hintbar">
+    <span>拖动旋转 · 滚轮 / 双指缩放 · 右键拖动平移</span>
+    <span>点 3D 里的开关面板（或上方按钮）：开关灯 + 下方显示该盒接线图</span>
+    <span>开关 1：灯 1 与新增灯同开同关 · 开关 2 / 开关 3：双控灯 2，同掷向亮、任一处可开关</span>
+    <span>A 段：箱下口出 → 地面 → 上墙 → 开关 1 盒下口进、上口出</span>
+    <span>房间一：开关 1 + 灯 1 + 新增灯 · 房间二：开关 2 + 开关 3 + 灯 2（中间有隔墙，3D 里可看到）</span>
+    <span>原走法：灯 2 的 N / PE 经 C 段 → E 段 → B2 段随开关链到灯 2 盒，灯盒不跨组串联（只有灯 1 盒 → 新增灯盒在同组内过线）</span>
+    <span>C 段：两开关不在同一间房，默认走地面（开关 1 盒下口出 → 地面 → 上墙 → 开关 2 盒下口进）；同一面墙直拉按钮仅作对比</span>
+    <span>E 段：开关 2 盒 → 开关 3 盒，同在房间二、同一面墙墙内直拉；共 4 根：联络线 T1 / T2 + N + PE</span>
+  </div>
+
+  <div class="statebar">
+    <div class="lampstate" id="state1"><div class="bulb">💡</div><div><b>灯 1</b><span id="state1t">开关 1 断开 · 受控火线 L1′ 无电</span></div></div>
+    <div class="lampstate" id="stateN"><div class="bulb">💡</div><div><b>新增灯（与灯 1 并联）</b><span id="stateNt">开关 1 断开 · 与灯 1 同开同关</span></div></div>
+    <div class="lampstate" id="state2"><div class="bulb">💡</div><div><b>灯 2（双控）</b><span id="state2t">开关 2 掷 T1 · 开关 3 掷 T2 · 掷向不同，灯 2 灭</span></div></div>
+    <div class="lampstate"><div class="bulb" style="font-size:15px">盒</div><div><b>房间一：开关 1 盒 · 房间二：开关 2、3 盒</b><span>开关 1 盒 = 分线点 · 灯 1 盒 = 过线点（只到新增灯盒）· 灯 2 盒独立由 B2 段进线 · 无单独分线盒</span></div></div>
+  </div>
+
+  <section class="card diagram-card" id="diagramCard" aria-live="polite">
+    <div class="dhead">
+      <h2 id="dTitle">接线图：点一个开关，这里显示它那个盒子怎么接</h2>
+      <span class="dstatus" id="dStatus">尚未选择开关</span>
+    </div>
+    <p id="dEmpty" style="margin:8px 0 0">点上方「开关 1 / 开关 2 / 开关 3」按钮，或直接点 3D 里的开关面板 —— 灯会亮灭，这里同步换成那个开关盒的盒内接线图；点「灯 1 盒过线图」看开关 1 这一组两灯共用段在灯 1 盒里怎么并接过线到新增灯盒。原走法下三个开关盒里 N、PE 都经过端子：开关 1 盒分两路，开关 2 盒直通，开关 3 盒对接到灯 2。</p>
+
+    <figure class="dfig" id="fig1" style="margin:10px 0 0">
+      <svg viewBox="0 0 680 380" role="img" aria-label="开关1盒接线图：A段从下口进，B1段从上口出去灯1盒，C段从下口出去开关2盒">
+        <rect x="110" y="322" width="130" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="330" y="8" width="140" height="52" rx="6" fill="#d8d0bd"/>
+        <rect x="460" y="322" width="140" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="60" y="60" width="560" height="262" rx="12" fill="none" stroke="#8a7f68" stroke-width="2.5"/>
+        <text x="76" y="88" font-size="16" font-weight="700" fill="currentColor">开关 1 盒（86 盒 · 分线点 · 下进上出）</text>
+        <text x="175" y="352" font-size="13.5" text-anchor="middle" fill="#5c665f">A段 ↑ 下口进（走地面来）</text>
+        <text x="400" y="38" font-size="13.5" text-anchor="middle" fill="#5c665f">B1段 → 灯 1 盒（上口出）</text>
+        <text x="530" y="352" font-size="13.5" text-anchor="middle" fill="#5c665f">C段 ↓ 下口出 → 开关 2 盒</text>
+        <path d="M140,362 V200 H210" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <path d="M175,362 V238 H240" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <path d="M210,362 V282 H240" stroke="#9db300" stroke-width="5" fill="none"/>
+        <text x="86" y="212" font-size="14" font-weight="700" fill="#dc2626">L 来自电箱（下口进）</text>
+        <text x="120" y="252" font-size="14" font-weight="700" fill="#2563eb">N ↑</text>
+        <text x="120" y="296" font-size="14" font-weight="700" fill="#7a8c00">PE ↑</text>
+        <circle cx="210" cy="200" r="7" fill="#dc2626"/>
+        <path d="M210,200 V118 H300" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <path d="M210,200 H500 V362" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <text x="330" y="188" font-size="13.5" fill="#dc2626">L 一支经 C 段从下口去开关 2 盒（未受控）</text>
+        <rect x="300" y="92" width="110" height="52" rx="8" fill="#fffdf8" stroke="#8a7f68" stroke-width="2"/>
+        <text x="355" y="114" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor">开关 1</text>
+        <text x="355" y="134" font-size="12" text-anchor="middle" fill="#5c665f">单控 · 只断火线 · 带两灯</text>
+        <text x="316" y="84" font-size="13" font-weight="700" fill="#dc2626">L 进</text>
+        <path d="M410,108 H440 V66" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <text x="448" y="100" font-size="13.5" font-weight="700" fill="#dc2626">L1′ 上口出</text>
+        <rect x="240" y="222" width="86" height="32" rx="6" fill="#2563eb"/>
+        <text x="283" y="243" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">N 端子</text>
+        <path d="M326,230 H425 V66" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <path d="M326,246 H495 V362" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <text x="440" y="215" font-size="13" fill="#2563eb">N 分两路：上口去灯 1 盒 · 下口经 C 段去开关 2 盒</text>
+        <rect x="240" y="266" width="86" height="32" rx="6" fill="#9db300"/>
+        <text x="283" y="287" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">PE 端子</text>
+        <path d="M326,274 H455 V66" stroke="#9db300" stroke-width="5" fill="none"/>
+        <path d="M326,290 H565 V362" stroke="#9db300" stroke-width="5" fill="none"/>
+        <path d="M283,298 V312 H196" stroke="#9db300" stroke-width="3.5" fill="none"/>
+        <circle cx="188" cy="312" r="5" fill="#9db300"/>
+        <text x="330" y="312" font-size="13" fill="#7a8c00">PE 分两路：上口去灯 1 盒 · 下口经 C 段去开关 2 盒 + 尾线接盒体</text>
+      </svg>
+      <figcaption class="dnotes"><strong>读法（下进上出 · 原走法）：</strong>A 段从盒<strong>下口</strong>进盒 3 根。<span class="wire w-r">L</span> 在盒内分两支：一支进开关 1、出 <span class="wire w-r">L1′</span> 从<strong>上口</strong>去灯 1 盒 —— 这一根 L1′ 同时供灯 1 和新增灯（在灯 1 盒并接，见过线图），所以开关 1 一合，两灯同亮；另一支<strong>不受开关控制</strong>，经 C 段从下口去开关 2 盒（双控那一路）。<span class="wire w-b">N</span>、<span class="wire w-p">PE</span> 在端子里接通后<strong>各分两路</strong>：一路从<strong>上口</strong>经 B1 段去灯 1 盒，另一路经 <strong>C 段</strong>去开关 2 盒、再随 E 段、B2 段到灯 2；PE 另加一根尾线接盒体接地螺丝。<strong>N、PE 不接开关。</strong></figcaption>
+    </figure>
+
+    <figure class="dfig" id="figLamp" style="margin:10px 0 0">
+      <svg viewBox="0 0 680 380" role="img" aria-label="灯1盒过线图：B1段进来三根线，在盒内并接灯1后继续去新增灯盒">
+        <rect x="110" y="290" width="130" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="440" y="290" width="140" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="60" y="56" width="560" height="234" rx="12" fill="none" stroke="#8a7f68" stroke-width="2.5"/>
+        <text x="76" y="84" font-size="16" font-weight="700" fill="currentColor">灯 1 盒（顶板内 · 过线点 · 两灯共用段在此并接）</text>
+        <text x="175" y="326" font-size="13.5" text-anchor="middle" fill="#5c665f">B1段 ↑ 进（来自开关 1 盒）</text>
+        <text x="510" y="326" font-size="13.5" text-anchor="middle" fill="#5c665f">D段 → 新增灯盒</text>
+        <path d="M150,330 V148 H530 V330" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <path d="M185,330 V198 H505 V330" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <path d="M220,330 V248 H480 V330" stroke="#9db300" stroke-width="5" fill="none"/>
+        <circle cx="325" cy="148" r="6" fill="#dc2626"/><circle cx="340" cy="198" r="6" fill="#2563eb"/><circle cx="355" cy="248" r="6" fill="#9db300"/>
+        <path d="M325,148 V262" stroke="#dc2626" stroke-width="4" fill="none"/>
+        <path d="M340,198 V262" stroke="#2563eb" stroke-width="4" fill="none"/>
+        <path d="M355,248 V262" stroke="#9db300" stroke-width="4" fill="none"/>
+        <circle cx="340" cy="276" r="13" fill="#fef08a" stroke="#eab308" stroke-width="2.5"/>
+        <text x="368" y="281" font-size="14" font-weight="700" fill="currentColor">灯 1 本体（吊在盒下）</text>
+        <text x="92" y="140" font-size="14" font-weight="700" fill="#dc2626">L1′ 一套供两灯</text>
+        <text x="92" y="192" font-size="14" font-weight="700" fill="#2563eb">N 共用</text>
+        <text x="92" y="242" font-size="14" font-weight="700" fill="#7a8c00">PE 共用</text>
+        <text x="470" y="140" font-size="13.5" fill="#dc2626">L1′ 继续 →</text>
+        <text x="470" y="192" font-size="13.5" fill="#2563eb">N 继续 →</text>
+        <text x="440" y="242" font-size="13.5" fill="#7a8c00">PE 继续 →</text>
+      </svg>
+      <figcaption class="dnotes"><strong>读法（开关 1 两灯共用段）：</strong>B1 段进灯 1 盒只有<strong>一套</strong> <span class="wire w-r">L1′</span>、<span class="wire w-b">N</span>、<span class="wire w-p">PE</span>。三根线在盒内端子上<strong>并接</strong>：一支接灯 1 本体，另一支经 D 段原样继续到新增灯盒 —— 新增灯和灯 1 接在<strong>同一根 L1′</strong> 上，所以必然同开同关。主线在端子里并接、<strong>不剪断串接</strong>：拆下灯 1 检修时，只要端子不动，新增灯那一路照样通。</figcaption>
+    </figure>
+
+    <figure class="dfig" id="fig2" style="margin:10px 0 0">
+      <svg viewBox="0 0 680 380" role="img" aria-label="开关2盒接线图：双控开关A，C段从下口进，E段联络线从下口出去开关3盒">
+        <rect x="110" y="322" width="130" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="460" y="322" width="150" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="60" y="60" width="560" height="262" rx="12" fill="none" stroke="#8a7f68" stroke-width="2.5"/>
+        <text x="76" y="88" font-size="16" font-weight="700" fill="currentColor">开关 2 盒（86 盒 · 双控 A · 下口进 / 下口出）</text>
+        <text x="175" y="352" font-size="13.5" text-anchor="middle" fill="#5c665f">C段 ↑ 下口进（来自开关 1 盒）</text>
+        <text x="535" y="352" font-size="13.5" text-anchor="middle" fill="#5c665f">E段 ↓ 下口出 → 开关 3 盒</text>
+        <path d="M140,362 V200 H210" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <path d="M175,362 V238 H240" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <path d="M210,362 V282 H240" stroke="#9db300" stroke-width="5" fill="none"/>
+        <text x="86" y="212" font-size="14" font-weight="700" fill="#dc2626">L 来自开关 1 盒（未受控）</text>
+        <text x="120" y="252" font-size="14" font-weight="700" fill="#2563eb">N ↑</text>
+        <text x="120" y="296" font-size="14" font-weight="700" fill="#7a8c00">PE ↑</text>
+        <path d="M210,200 V118 H292" stroke="#dc2626" stroke-width="5" fill="none"/>
+        <text x="222" y="108" font-size="13" font-weight="700" fill="#dc2626">L 进公共端 COM</text>
+        <rect x="292" y="92" width="128" height="56" rx="8" fill="#fffdf8" stroke="#8a7f68" stroke-width="2"/>
+        <text x="356" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor">双控开关 2</text>
+        <text x="356" y="135" font-size="12" text-anchor="middle" fill="#5c665f">单刀双掷 · COM / L1 / L2</text>
+        <path d="M420,106 H486 V362" stroke="#f97316" stroke-width="5" fill="none"/>
+        <path d="M420,134 H522 V362" stroke="#a855f7" stroke-width="5" fill="none"/>
+        <text x="428" y="98" font-size="13.5" font-weight="700" fill="#f97316">T1 联络线</text>
+        <text x="428" y="162" font-size="13.5" font-weight="700" fill="#a855f7">T2 联络线</text>
+        <rect x="240" y="222" width="86" height="32" rx="6" fill="#2563eb"/>
+        <text x="283" y="243" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">N 端子</text>
+        <path d="M326,238 H558 V362" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <text x="440" y="230" font-size="13" fill="#2563eb">N 不接开关 · 经 E 段直通开关 3 盒</text>
+        <rect x="240" y="266" width="86" height="32" rx="6" fill="#9db300"/>
+        <text x="283" y="287" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">PE 端子</text>
+        <path d="M326,282 H594 V362" stroke="#9db300" stroke-width="5" fill="none"/>
+        <path d="M283,298 V312 H196" stroke="#9db300" stroke-width="3.5" fill="none"/>
+        <circle cx="188" cy="312" r="5" fill="#9db300"/>
+        <text x="440" y="282" font-size="13" fill="#7a8c00">PE 直通 + 尾线接盒体</text>
+      </svg>
+      <figcaption class="dnotes"><strong>读法（双控的头一个开关）：</strong>C 段从<strong>下口</strong>进盒，未受控的 <span class="wire w-r">L</span> 进双控开关 2 的<strong>公共端 COM</strong>；开关的两个出线端 L1、L2 分别接<strong>联络线 <span class="wire w-t1">T1</span>、<span class="wire w-t2">T2</span></strong>，连同端子直通的 N、PE 一起经 E 段去开关 3 盒。开关 2 掷向哪根联络线，火线就从哪根走 —— 它自己<strong>不直接接灯 2</strong>。</figcaption>
+    </figure>
+
+    <figure class="dfig" id="fig3" style="margin:10px 0 0">
+      <svg viewBox="0 0 680 380" role="img" aria-label="开关3盒接线图：双控开关B，E段从下口进，B2段从上口出去灯2">
+        <rect x="110" y="322" width="150" height="46" rx="6" fill="#d8d0bd"/>
+        <rect x="330" y="8" width="140" height="52" rx="6" fill="#d8d0bd"/>
+        <rect x="60" y="60" width="560" height="262" rx="12" fill="none" stroke="#8a7f68" stroke-width="2.5"/>
+        <text x="76" y="88" font-size="16" font-weight="700" fill="currentColor">开关 3 盒（86 盒 · 新增 · 双控 B · 下进上出）</text>
+        <text x="185" y="352" font-size="13.5" text-anchor="middle" fill="#5c665f">E段 ↑ 下口进（来自开关 2 盒）</text>
+        <text x="400" y="38" font-size="13.5" text-anchor="middle" fill="#5c665f">B2段 → 灯 2（上口出）</text>
+        <path d="M140,362 V118 H262" stroke="#f97316" stroke-width="5" fill="none"/>
+        <path d="M172,362 V146 H262" stroke="#a855f7" stroke-width="5" fill="none"/>
+        <path d="M204,362 V238 H240" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <path d="M236,362 V282 H240" stroke="#9db300" stroke-width="5" fill="none"/>
+        <text x="80" y="112" font-size="14" font-weight="700" fill="#f97316">T1 进 L1 端</text>
+        <text x="80" y="168" font-size="14" font-weight="700" fill="#a855f7">T2 进 L2 端</text>
+        <text x="96" y="252" font-size="14" font-weight="700" fill="#2563eb">N ↑</text>
+        <text x="96" y="296" font-size="14" font-weight="700" fill="#7a8c00">PE ↑</text>
+        <rect x="262" y="92" width="128" height="56" rx="8" fill="#fffdf8" stroke="#8a7f68" stroke-width="2"/>
+        <text x="326" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor">双控开关 3</text>
+        <text x="326" y="135" font-size="12" text-anchor="middle" fill="#5c665f">单刀双掷 · L1 / L2 / COM</text>
+        <path d="M390,118 H440 V66" stroke="#ea580c" stroke-width="5" fill="none"/>
+        <text x="448" y="100" font-size="13.5" font-weight="700" fill="#ea580c">L2′ 从 COM 出 · 上口去灯 2</text>
+        <text x="448" y="150" font-size="13.5" fill="#5c665f">只有开关 2、开关 3 掷向同一根联络线时，L2′ 才有电</text>
+        <rect x="240" y="222" width="86" height="32" rx="6" fill="#2563eb"/>
+        <text x="283" y="243" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">N 端子</text>
+        <path d="M326,238 H425 V66" stroke="#2563eb" stroke-width="5" fill="none"/>
+        <text x="440" y="243" font-size="13" fill="#2563eb">N 对接、从上口去灯 2，不接开关</text>
+        <rect x="240" y="266" width="86" height="32" rx="6" fill="#9db300"/>
+        <text x="283" y="287" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">PE 端子</text>
+        <path d="M326,282 H455 V66" stroke="#9db300" stroke-width="5" fill="none"/>
+        <path d="M283,298 V312 H196" stroke="#9db300" stroke-width="3.5" fill="none"/>
+        <circle cx="188" cy="312" r="5" fill="#9db300"/>
+        <text x="440" y="287" font-size="13" fill="#7a8c00">PE 对接去灯 2 + 尾线接盒体</text>
+      </svg>
+      <figcaption class="dnotes"><strong>读法（双控的第二个开关）：</strong>E 段从<strong>下口</strong>进盒 4 根：<span class="wire w-t1">T1</span>、<span class="wire w-t2">T2</span> 分别进双控开关 3 的 L1、L2 端，开关 3 的<strong>公共端 COM</strong> 出 <span class="wire w-o">L2′</span>、连同 N、PE 从<strong>上口</strong>去灯 2。判断灯 2 亮不亮只看一件事：<strong>两个双控开关是不是掷向同一根联络线</strong> —— 同掷 T1 或同掷 T2，灯亮；一个 T1 一个 T2，灯灭。在任一处拨一下，都能改变灯 2 的状态。</figcaption>
+    </figure>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>每段管里到底几根线</h2>
+      <p>根数以系统图为准：WL1 全回路 <strong>2.5 mm²</strong>，管统一 <strong>JDG20</strong>。按<strong>原走法共 6 段管、无 F 段</strong>：每组灯的 L、N、PE 同管走，灯 2 的 N、PE 随开关链（C → E → B2）到灯 2 盒，3 个灯盒不跨组串联。布局按房间：<strong>房间一 = 开关 1 盒 + 灯 1 + 新增灯；房间二 = 开关 2、3 盒 + 灯 2</strong>，两开关不在同一间房，C 段默认走地面。<strong>进线（A 段）和 C 段走地面，开关盒一律下口进、上口出去灯</strong>；系统图标注为 WC/CC，本图按你定的走法把进线改为地面敷设（FC），组价时 A 段（及 C 段）按地面内敷设计。</p>
+      <table>
+        <thead><tr><th>管段</th><th>管内导线</th><th>根数</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A 段（进线）</strong><br>电箱 → 开关 1 盒<br><code>箱下口出 → FC 地面 → 上墙 → 开关 1 盒下口进</code></td><td><span class="wire w-r">L</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>3 根</strong></td></tr>
+          <tr><td><strong>B1 段（两灯共用）</strong><br>开关 1 盒 → 灯 1 盒<br><code>开关 1 盒上口出 · WC / CC</code></td><td><span class="wire w-r">L1′ 受控火线（两灯共用）</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>3 根</strong></td></tr>
+          <tr><td><strong>D 段（过线）</strong><br>灯 1 盒 → 新增灯盒<br><code>顶板内 CC · 灯 1 盒并接后继续</code></td><td><span class="wire w-r">L1′</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>3 根</strong></td></tr>
+
+          <tr><td><strong>C 段</strong><br>开关 1 盒（房间一）→ 开关 2 盒（房间二）<br><code>两开关不在同一间房：开关 1 盒下口出 → FC 地面 → 上墙 → 开关 2 盒下口进（同一面墙直拉仅作对比）</code></td><td><span class="wire w-r">L（未受控）</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>3 根</strong></td></tr>
+          <tr><td><strong>E 段（双控联络）</strong><br>开关 2 盒 → 开关 3 盒（同在房间二）<br><code>墙内 WC 直拉（同一面墙）</code></td><td><span class="wire w-t1">T1 联络线</span> · <span class="wire w-t2">T2 联络线</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>4 根</strong></td></tr>
+          <tr><td><strong>B2 段</strong><br>开关 3 盒 → 灯 2 盒<br><code>开关 3 盒上口出 · WC / CC</code></td><td><span class="wire w-o">L2′ 受控火线</span> · <span class="wire w-b">N</span> · <span class="wire w-p">PE</span></td><td><strong>3 根</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="callout good"><strong>原走法省线只在同组内：</strong>主干 A 段只走<strong>一套</strong>线供全回路，开关 1 的两盏灯共用 B1 一套线、在灯 1 盒过线接第二灯（D 段仍是 L1′、N、PE 共 3 根），这是同一开关组内的共用。跨组不再串联：灯 2 的 N、PE 不走灯盒，改随 C 段（3 根）、E 段（4 根）、B2 段（3 根）到灯 2 盒。省不了的也写明：双控的 <strong>T1、T2 两根联络线一根不能少</strong>，每盏灯的 PE 不能省，两路受控火线不能合并。</div>
+      <h3>双控这一路，哪根线带电会变</h3>
+      <p>C 段里的 <span class="wire w-r">L</span> 一直未受控带电；E 段里<strong>哪根联络线带电，取决于两个双控开关当时的掷向</strong> —— 在开关 3 处把灯关了，开关 2 那边再拨一下，联络线又会带电。所以检修开关 2 盒、开关 3 盒或灯 2 之前，<strong>必须先断 WL1 空开</strong>，不能靠"灯是灭的"判断没电。</p>
+    </section>
+
+    <section class="card">
+      <h2>每个盒子里面分别怎么接</h2>
+      <p>点任意一个开关，下方就显示那个盒的接线图；点「放大开关 X 盒内部」还能在 3D 里看盒内放大示意。各盒接法：</p>
+      <ol>
+        <li><strong>开关 1 盒（分线点 · 下进上出）：</strong>A 段从<strong>下口</strong>进盒，<span class="wire w-r">L</span> 分两支 —— 一支进开关 1、出 <span class="wire w-r">L1′</span> 从<strong>上口</strong>去灯 1 盒（一根 L1′ 带两灯）；另一支经 C 段去开关 2 盒。<span class="wire w-b">N</span>、<span class="wire w-p">PE</span> 在端子里<strong>各分两路</strong>：一路从上口经 B1 段去灯 1 盒，另一路随 C 段去开关 2 盒；PE 另加尾线接盒体。</li>
+        <li><strong>灯 1 盒（过线点）：</strong>B1 进来的一套线在端子并接：一支接灯 1，另一支经 D 段去新增灯盒。两灯<strong>并联</strong>在 L1′ 与 N 之间，同开同关，不能串联。新增灯盒是这一组的<strong>末端</strong>，不再往灯 2 盒连管连线。</li>
+        <li><strong>开关 2 盒（双控 A · 房间二）：</strong>C 段进来的 <span class="wire w-r">L</span> 进双控开关 2 的 <strong>COM</strong>；开关的 L1、L2 端出 <span class="wire w-t1">T1</span>、<span class="wire w-t2">T2</span> 两根联络线，连同端子直通的 <span class="wire w-b">N</span>、<span class="wire w-p">PE</span> 一起经 E 段去开关 3 盒（E 段共 4 根）。</li>
+        <li><strong>开关 3 盒（双控 B · 房间二）：</strong><span class="wire w-t1">T1</span>、<span class="wire w-t2">T2</span> 进双控开关 3 的 L1、L2 端，<strong>COM</strong> 出 <span class="wire w-o">L2′</span>，连同对接直通的 <span class="wire w-b">N</span>、<span class="wire w-p">PE</span> 一起从<strong>上口</strong>经 B2 段去灯 2（B2 段共 3 根）。开关 2、开关 3 必须都用<strong>单联双控（单刀双掷）</strong>开关，普通单控开关接不出双控。</li>
+        <li><strong>双控判据：</strong>两开关同掷 T1 → 亮；同掷 T2 → 亮；一个 T1 一个 T2 → 灭。任一处拨动，都翻转灯 2 的状态。</li>
+        <li><strong>地线规矩不变：</strong><span class="wire w-p">PE</span> 每个盒里还要一根尾线接盒体接地螺丝。<strong>PE 不进开关、永不断开、不能省。</strong></li>
+      </ol>
+      <div class="callout"><strong>三条铁规矩：</strong>接头只能在开关盒、灯盒里做，<strong>管内不许有接头</strong>；N 与 PE 在箱外绝不能混接，否则漏保误跳或失去保护；双控联络线 T1、T2 两头要做<strong>对应标记</strong>，接反了两个开关的掷向关系就对不上、排查很费劲。</div>
+      <h3>开关 1 带两灯，两种接法比一比</h3>
+      <div class="compare">
+        <div class="cmp bad"><b>分开拉（费线）</b><span class="n">2 套长线</span><span style="font-size:13.5px;color:var(--muted)">开关 1 盒分别拉两段到两盏灯：L1′、N、PE 在两段长管里各走一遍，线和管都重复。</span></div>
+        <div class="cmp"><b>本图接法（共用 + 过线）</b><span class="n">1 套 + 1 短段</span><span style="font-size:13.5px;color:var(--muted)">B1 一套线到灯 1 盒，盒内并接灯 1，D 段短管过线到新增灯盒；共用段只走一遍，接头全在灯盒里可检修。</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>顺着电流读一遍</h2>
+    <p>层总电箱来线进 ALss1：L、N 过总开关 <strong>MCB-C32A/2P</strong>，再过 WL1 分路 <strong>C16A/2P + RCD 30mA</strong>（L、N 一起穿过漏保互感器，漏电差值超 30mA 即同时断 L、N）；PE 不过任何开关，直达 PE 排。出箱 3 根线从<strong>箱体下口</strong>出、走地面、上墙、从<strong>开关 1 盒下口</strong>进盒后分两路：<strong>一路</strong> —— 开关 1 合上 → 电流走 L1′、从开关 1 盒<strong>上口</strong>出 → 灯 1 盒：一支进灯 1，一支经 D 段进新增灯，两灯并联、同亮同灭 → 沿共用 N 回箱内 N 排。<strong>另一路</strong> —— 未受控 L 经 C 段到开关 2 盒、进双控开关 2 的 COM，按掷向走联络线 T1 或 T2、经 E 段到开关 3 盒；只有开关 3 也掷向同一根联络线时才接通，电流从开关 3 的 COM 出 L2′、从开关 3 盒<strong>上口</strong>出 → 灯 2 → 沿 B2、E、C、A 的 N 回箱内 N 排。所以灯 2 在开关 2、开关 3 两处都能开关，进门开、到另一头关，就是这种接法。</p>
+    <p style="margin-bottom:0">负荷提醒：WL1 系统图原值合计 <strong>0.1 kW</strong>。<strong>新增灯的功率用户尚未给出，本图不编功率数</strong>；功率补齐后要按三盏灯的新合计复算并同步改图改表（Pe / Pjs / Ijs）。空开仍按原 <strong>C16A</strong>、线径仍按原 <strong>2.5 mm²</strong> 不变 —— 新增一盏灯后数值仍远小于 C16A 与 2.5 mm² 载流量，复算确认即可；双控只改控制方式，不增加负荷。灯具数量、单控 / 双控以原图图例与全图为准，本图按开关 1 单控两灯、灯 2 两地双控绘制。</p>
+  </section>
+
+  <p class="foot">规格来源：宿舍照明配电箱系统图 1（ALss1）WL1 回路原值 —— MCB-C16A/2P / RCD-30mA，WDZB1-BYJ-3×2.5-JDG20-WC/CC，0.1 kW；新增灯功率待用户补充。房间与点位为走法示意，不作施工尺寸；实际施工与通电须由持证电工按现行规范执行。</p>
+</div>
+
+<script>
+/* Fallback: diagram display + lamp states work even if the 3D library fails
+   to load. When Three.js loads, the main script below replaces these
+   handlers with the full version that also drives the 3D scene. */
+(function(){
+  var st = { sw1:false, p2:0, p3:1 };
+  function lamp2On(){ return st.p2 === st.p3; }
+  function show(n){
+    var titles = {1:'接线图：开关 1 盒（分线点）', 4:'接线图：灯 1 盒（过线点 · 两灯共用）', 2:'接线图：开关 2 盒（双控 A）', 3:'接线图：开关 3 盒（双控 B · 新增）'};
+    document.getElementById('dTitle').textContent = titles[n];
+    var ds = document.getElementById('dStatus'), txt, lit;
+    if(n===1){ lit = st.sw1; txt = st.sw1 ? '开关 1 已合上 · 灯 1 与新增灯同亮' : '开关 1 断开 · 灯 1 与新增灯同灭'; }
+    else if(n===4){ lit = st.sw1; txt = st.sw1 ? '开关 1 合上 · L1′ 带电，两灯同亮' : '开关 1 断开 · L1′ 无电，两灯同灭'; }
+    else { lit = lamp2On(); txt = '开关 2 掷 T'+(st.p2+1)+' · 开关 3 掷 T'+(st.p3+1)+(lit ? ' · 同掷向，灯 2 亮' : ' · 掷向不同，灯 2 灭'); }
+    ds.textContent = txt; ds.classList.toggle('lit', lit);
+    document.getElementById('dEmpty').style.display='none';
+    document.getElementById('fig1').classList.toggle('show', n===1);
+    document.getElementById('figLamp').classList.toggle('show', n===4);
+    document.getElementById('fig2').classList.toggle('show', n===2);
+    document.getElementById('fig3').classList.toggle('show', n===3);
+    document.getElementById('state1').classList.toggle('lit', st.sw1);
+    document.getElementById('stateN').classList.toggle('lit', st.sw1);
+    document.getElementById('state1t').textContent = st.sw1 ? '开关 1 合上 · L1′ 带电，灯 1 亮' : '开关 1 断开 · 受控火线 L1′ 无电';
+    document.getElementById('stateNt').textContent = st.sw1 ? '开关 1 合上 · 与灯 1 同时亮' : '开关 1 断开 · 与灯 1 同开同关';
+    document.getElementById('state2').classList.toggle('lit', lamp2On());
+    document.getElementById('state2t').textContent = '开关 2 掷 T'+(st.p2+1)+' · 开关 3 掷 T'+(st.p3+1)+(lamp2On() ? ' · 同掷向，灯 2 亮' : ' · 掷向不同，灯 2 灭');
+    document.getElementById('btnSw1').classList.toggle('on', st.sw1);
+    document.getElementById('btnSw2').classList.toggle('on', st.p2===1);
+    document.getElementById('btnSw3').classList.toggle('on', st.p3===1);
+  }
+  document.getElementById('btnSw1').onclick=function(){ st.sw1=!st.sw1; show(1); };
+  document.getElementById('btnSw2').onclick=function(){ st.p2=st.p2?0:1; show(2); };
+  document.getElementById('btnSw3').onclick=function(){ st.p3=st.p3?0:1; show(3); };
+  document.getElementById('btnLampFig').onclick=function(){ show(4); };
+  var bn=document.getElementById('btnCNear'), bf=document.getElementById('btnCFar');
+  if(bn && bf){
+    bn.onclick=function(){ bn.classList.add('on'); bf.classList.remove('on'); };
+    bf.onclick=function(){ bf.classList.add('on'); bn.classList.remove('on'); };
+  }
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  var canvas = document.getElementById('scene');
+  if (typeof THREE === 'undefined') { document.getElementById('fallback').style.display='block'; canvas.style.display='none'; return; }
+
+  var W = canvas.clientWidth, H = canvas.clientHeight;
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(W,H);
+  renderer.setClearColor(0x101613);
+
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x101613, 18, 34);
+  var camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
+  var CAM0 = new THREE.Vector3(1.2, 3.4, 11.5), TGT0 = new THREE.Vector3(0.2, 2.2, 0);
+  camera.position.copy(CAM0);
+
+  var controls = null;
+  if (THREE.OrbitControls) { controls = new THREE.OrbitControls(camera, canvas); controls.target.copy(TGT0); controls.enableDamping = true; controls.maxDistance = 22; controls.minDistance = 3; }
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  var key = new THREE.DirectionalLight(0xfff2d9, 0.9); key.position.set(5,9,7); scene.add(key);
+  var fill = new THREE.DirectionalLight(0xbfd9ff, 0.35); fill.position.set(-6,4,5); scene.add(fill);
+
+  var root = new THREE.Group(); scene.add(root);
+
+  // ---------- materials ----------
+  var M = {
+    wall: new THREE.MeshStandardMaterial({color:0x8a7f68, transparent:true, opacity:0.20, roughness:0.95, side:THREE.DoubleSide, depthWrite:false}),
+    wallEdge: new THREE.LineBasicMaterial({color:0xd6c9a3, transparent:true, opacity:0.6}),
+    conduit: new THREE.MeshStandardMaterial({color:0xcfd4d1, transparent:true, opacity:0.30, roughness:0.35, metalness:0.55}),
+    boxBody: new THREE.MeshStandardMaterial({color:0xe8e4da, roughness:0.5, metalness:0.25}),
+    boxInner: new THREE.MeshStandardMaterial({color:0x3c4340, roughness:0.8}),
+    breaker: new THREE.MeshStandardMaterial({color:0x22282a, roughness:0.55}),
+    breakerTop: new THREE.MeshStandardMaterial({color:0xf3f4f6, roughness:0.4}),
+    plate: new THREE.MeshStandardMaterial({color:0xf7f3e8, roughness:0.35}),
+    rocker: new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.3}),
+    shadeOff: new THREE.MeshStandardMaterial({color:0xd9d4c5, roughness:0.6, transparent:true, opacity:0.9}),
+    bulbOff: new THREE.MeshStandardMaterial({color:0x9ca3af, roughness:0.4})
+  };
+  function wireMat(hex){ return new THREE.MeshStandardMaterial({color:hex, roughness:0.45}); }
+  var WM = { L: wireMat(0xdc2626), L2: wireMat(0xea580c), N: wireMat(0x2563eb), PE: wireMat(0x9db300), T1: wireMat(0xf97316), T2: wireMat(0xa855f7) };
+
+  // ---------- helpers ----------
+  function box(w,h,d,mat,x,y,z,parent){
+    var m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); (parent||root).add(m); return m;
+  }
+  function label(text, x, y, z, scale, color){
+    var c = document.createElement('canvas'); c.width=512; c.height=128;
+    var g = c.getContext('2d');
+    g.font = 'bold 44px "PingFang SC","Microsoft YaHei",sans-serif';
+    g.textAlign='center'; g.textBaseline='middle';
+    var w = Math.min(500, g.measureText(text).width + 36);
+    g.fillStyle='rgba(10,14,12,0.78)';
+    var rx=(512-w)/2; g.beginPath();
+    if(g.roundRect) g.roundRect(rx,22,w,84,18); else g.rect(rx,22,w,84);
+    g.fill();
+    g.fillStyle = color || '#f5f0df'; g.fillText(text,256,66);
+    var tex = new THREE.CanvasTexture(c); tex.anisotropy=4;
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false}));
+    sp.position.set(x,y,z); sp.scale.set(2.5*(scale||1), 0.625*(scale||1), 1); sp.renderOrder=10; root.add(sp); return sp;
+  }
+  function pathCurve(pts){
+    var v = pts.map(function(p){ return new THREE.Vector3(p[0],p[1],p[2]); });
+    return new THREE.CatmullRomCurve3(v, false, 'catmullrom', 0.08);
+  }
+  function tube(curve, radius, mat, parent){
+    var m = new THREE.Mesh(new THREE.TubeGeometry(curve, 64, radius, 10, false), mat);
+    (parent||root).add(m); return m;
+  }
+  function offsetCurve(pts, dx, dy){
+    return pathCurve(pts.map(function(p){ return [p[0]+dx, p[1]+dy, p[2]]; }));
+  }
+
+  // ---------- room: wall + ceiling + floor ----------
+  var wall = box(11.5, 4.6, 0.18, M.wall, 0.2, 2.3, -0.55);
+  var ceil = box(11.5, 0.18, 3.4, M.wall, 0.2, 4.62, 0.95);
+  var floor = box(11.5, 0.1, 3.4, new THREE.MeshStandardMaterial({color:0x2a2f2c, roughness:1}), 0.2, -0.05, 0.95);
+  function edges(mesh){ var e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), M.wallEdge); e.position.copy(mesh.position); root.add(e); }
+  edges(wall); edges(ceil);
+  // two rooms: switch 1 alone in room 1; switches 2 + 3 together in room 2
+  var divider = box(0.14, 4.6, 3.4, M.wall, 1.15, 2.3, 0.95);
+  edges(divider);
+  box(6.7, 0.04, 3.3, new THREE.MeshStandardMaterial({color:0x0f766e, transparent:true, opacity:0.16, roughness:1}), -2.2, 0.03, 0.95);
+  box(4.8, 0.04, 3.3, new THREE.MeshStandardMaterial({color:0xb45309, transparent:true, opacity:0.16, roughness:1}), 3.55, 0.03, 0.95);
+  label('房间一 · 开关 1', -2.3, 1.02, 2.35, 0.95, '#8fe3d8');
+  label('房间二 · 开关 2 + 开关 3', 3.55, 1.02, 2.35, 0.95, '#ffd9a0');
+  label('隔墙', 1.15, 4.15, 0.9, 0.65);
+  label('墙体（管在墙内 WC）', -3.4, 4.35, -0.4, 0.8);
+  label('顶板（管在顶板内 CC）', 3.6, 5.05, 0.9, 0.8);
+  label('地面 / 底板（管在地面内 FC）', 4.6, 0.42, 0.9, 0.8);
+
+  // ---------- distribution box ALss1 ----------
+  var db = new THREE.Group(); db.position.set(-4.1, 2.45, 0); root.add(db);
+  box(1.25, 1.6, 0.3, M.boxBody, 0, 0, 0, db);
+  box(1.08, 1.42, 0.04, M.boxInner, 0, 0, 0.14, db);
+  box(0.52, 0.34, 0.1, M.breaker, -0.2, 0.42, 0.2, db); box(0.52, 0.1, 0.11, M.breakerTop, -0.2, 0.42, 0.2, db);
+  box(0.52, 0.34, 0.1, M.breaker, -0.2, -0.02, 0.2, db); box(0.52, 0.1, 0.11, M.breakerTop, -0.2, -0.02, 0.2, db);
+  box(0.85, 0.07, 0.06, WM.N, 0, -0.48, 0.2, db);
+  box(0.85, 0.07, 0.06, WM.PE, 0, -0.62, 0.2, db);
+  label('电箱 ALss1', -4.1, 3.62, 0.3, 0.95);
+  label('总 C32 · WL1 C16+漏保', -4.1, 1.42, 0.3, 0.72, '#ffd9a0');
+
+  // ---------- three switch boxes ----------
+  function makeSwitchBox(x, title, titleColor){
+    var g = new THREE.Group(); g.position.set(x, 1.35, 0); root.add(g);
+    box(0.68, 0.62, 0.22, M.boxBody, 0, 0, 0, g);
+    box(0.54, 0.48, 0.05, M.boxInner, 0, 0, 0.1, g);
+    var plate = box(0.8, 0.74, 0.05, M.plate, 0, 0, 0.16, g);
+    var rocker = box(0.44, 0.54, 0.07, M.rocker, 0, 0, 0.2, g);
+    var conns = [ box(0.15,0.15,0.1, WM.L, -0.16, 0.13, 0.1, g),
+                  box(0.15,0.15,0.1, WM.N, -0.16, -0.15, 0.1, g),
+                  box(0.15,0.15,0.1, WM.PE, 0.16, -0.15, 0.1, g) ];
+    conns.forEach(function(m){ m.visible=false; });
+    label(title, x, 0.82, 0.3, 0.62, titleColor);
+    return {group:g, plate:plate, rocker:rocker, conns:conns, x:x};
+  }
+  var sw1Box = makeSwitchBox(-0.7, '开关 1 盒', '#ffb4a2');
+  var sw2Box = makeSwitchBox(1.9, '开关 2 盒 · 双控', '#ffc9a3');
+  var sw3Box = makeSwitchBox(4.4, '开关 3 盒 · 双控（新增）', '#d8b4fe');
+  var rocker1 = sw1Box.rocker, rocker2 = sw2Box.rocker, rocker3 = sw3Box.rocker;
+  label('开关 1 盒 = 分线点', -0.7, 2.2, 0.3, 0.9);
+  label('双控开关 A', 1.9, 2.2, 0.3, 0.9);
+  label('双控开关 B（另一位置）', 4.4, 2.2, 0.3, 0.9);
+
+  // ---------- lamps ----------
+  function makeLamp(x, name){
+    var g = new THREE.Group(); g.position.set(x, 4.5, 1.15); root.add(g);
+    box(0.55, 0.14, 0.55, M.boxBody, 0, 0.02, 0, g);
+    var shade = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.42, 0.3, 24, 1, true), M.shadeOff.clone()); shade.position.set(0,-0.22,0); g.add(shade);
+    var bulb = new THREE.Mesh(new THREE.SphereGeometry(0.17, 20, 16), M.bulbOff.clone()); bulb.position.set(0,-0.38,0); g.add(bulb);
+    var pt = new THREE.PointLight(0xffd97a, 0, 6); pt.position.set(0,-0.5,0.3); g.add(pt);
+    label(name, x, 3.72, 1.15, 0.8);
+    return {group:g, bulb:bulb, shade:shade, light:pt};
+  }
+  var lamp1 = makeLamp(-0.8, '灯 1 盒（房间一 · 过线）');
+  var lampNew = makeLamp(0.5, '新增灯盒（房间一 · 末端）');
+  var lamp2 = makeLamp(3.2, '灯 2 盒（房间二）');
+
+  // ---------- conduit + wire paths ----------
+  // A (incoming): BOTTOM of distribution box -> floor -> up wall -> BOTTOM of switch box 1
+  var pathA = [[-4.1,1.62,-0.12],[-4.1,0.22,0.02],[-0.88,0.22,0.02],[-0.88,1.06,-0.08]];
+  // B1 (shared by both of switch 1's lamps): TOP of switch box 1 -> ceiling -> lamp 1 box
+  var pathB1 = [[-0.85,1.7,-0.12],[-0.85,3.85,-0.1],[-0.85,4.35,0.5],[-0.8,4.35,0.9],[-0.8,4.42,1.15]];
+  // D (pass-through): lamp 1 box -> new lamp box, along the ceiling (both in room 1)
+  var pathD = [[-0.8,4.42,1.15],[0.5,4.42,1.15]];
+  // C-near: both boxes on the SAME wall -> straight inside that wall
+  var pathCnear = [[-0.36,1.42,-0.12],[1.56,1.42,-0.12]];
+  // C-far: NOT the same wall -> BOTTOM of switch box 1 -> floor -> up -> BOTTOM of switch box 2
+  var pathCfar = [[-0.52,1.06,-0.08],[-0.52,0.36,-0.16],[1.72,0.36,-0.16],[1.72,1.06,-0.08]];
+  // E (dual-control link): switch box 2 -> switch box 3, straight inside the wall: T1, T2, N, PE
+  var pathE = [[2.24,1.42,-0.12],[4.06,1.42,-0.12]];
+  // B2: TOP of switch box 3 -> ceiling -> lamp 2
+  var pathB2 = [[4.4,1.7,-0.12],[4.4,3.85,-0.1],[4.4,4.35,0.5],[3.2,4.35,0.9],[3.2,4.42,1.15]];
+
+  var conduitMeshes = [], wireMeshes = [], flowDefs = [];
+  function buildRun(pts, wires, groupName){
+    var grp = new THREE.Group(); grp.name = groupName; root.add(grp);
+    var c = tube(pathCurve(pts), 0.115, M.conduit, grp); conduitMeshes.push(c);
+    wires.forEach(function(wd, i){
+      var offs = [[-0.045,0.035],[0.05,0.03],[0,-0.055],[-0.005,0.085]];
+      var o = offs[i % offs.length];
+      var curve = offsetCurve(pts, o[0], o[1]);
+      var wm = tube(curve, 0.026, wd.mat, grp); wm.userData.only = wd.only || null; wireMeshes.push(wm);
+      flowDefs.push({curve:curve, key:wd.key, dots:[], grp:grp, only: wd.only || null});
+    });
+    return grp;
+  }
+  var grpA = buildRun(pathA, [{mat:WM.L,key:'live'},{mat:WM.N,key:'ret'},{mat:WM.PE,key:'pe'}], 'A');
+  label('A段 3根 · 箱下口→地面→开关1盒下口', -2.45, 0.66, 0.3, 0.8, '#ffd9a0');
+  var grpB1 = buildRun(pathB1, [{mat:WM.L,key:'l1'},{mat:WM.N,key:'l1r'},{mat:WM.PE,key:'pe'}], 'B1');
+  label('B1段 3根 · 两灯共用 · 上口出', 0.1, 4.15, 0.75, 0.75, '#ffb4a2');
+  var grpD = buildRun(pathD, [{mat:WM.L,key:'l1'},{mat:WM.N,key:'l1r'},{mat:WM.PE,key:'pe'}], 'D');
+  label('D段 3根 · 灯1盒过线', -0.15, 4.02, 1.25, 0.7, '#ffb4a2');
+  var grpCnear = buildRun(pathCnear, [{mat:WM.L,key:'live'},{mat:WM.N,key:'ret'},{mat:WM.PE,key:'pe'}], 'Cnear');
+  var lblCnearO = label('C段 3根 · 同一面墙内直拉', 0.6, 1.78, 0.1, 0.8, '#ffd9a0');
+  var grpCfar = buildRun(pathCfar, [{mat:WM.L,key:'live'},{mat:WM.N,key:'ret'},{mat:WM.PE,key:'pe'}], 'Cfar');
+  var lblCfarO = label('C段 3根 · 下口→地面→开关2盒下口', 0.6, 0.72, 0.1, 0.8, '#ffd9a0');
+  var grpE = buildRun(pathE, [{mat:WM.T1,key:'t1'},{mat:WM.T2,key:'t2'},{mat:WM.N,key:'l2r'},{mat:WM.PE,key:'pe'}], 'E');
+  var lblEO = label('E段 4根 · 联络线 T1/T2 + N + PE', 3.15, 1.78, 0.1, 0.75, '#ffd9a0');
+  var grpB2 = buildRun(pathB2, [{mat:WM.L2,key:'l2'},{mat:WM.N,key:'l2r'},{mat:WM.PE,key:'pe'}], 'B2');
+  var lblB2O = label('B2段 3根 · 开关3盒上口出', 4.35, 4.15, 0.75, 0.75, '#ffc9a3');
+
+  // ---- original wiring only: N/PE follow the switch chain (C -> E -> B2) ----
+  function refreshModeLabels(){
+    var near = S.cMode==='near';
+    lblCnearO.visible = near;
+    lblCfarO.visible = !near;
+    lblEO.visible = true;
+    lblB2O.visible = true;
+  }
+  function applyMode(){
+    wireMeshes.forEach(function(m){ m.visible = S.xray; });
+    refreshModeLabels();
+  }
+
+  // flow dots
+  var dotGeo = new THREE.SphereGeometry(0.05, 10, 8);
+  function dotColor(k){
+    if(k==='pe') return 0x9db300;
+    if(k==='t1') return 0xfb923c;
+    if(k==='t2') return 0xc084fc;
+    if(k==='l2') return 0xffa94d;
+    if(k==='ret'||k==='l1r'||k==='l2r') return 0x7db4ff;
+    return 0xff7a6b;
+  }
+  flowDefs.forEach(function(fd){
+    for (var i=0;i<4;i++){
+      var d = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({color: dotColor(fd.key)}));
+      d.visible=false; root.add(d); fd.dots.push(d);
+    }
+  });
+
+  // ---------- state ----------
+  // sw1: on/off. p2 / p3: dual-control positions, 0 = thrown to T1, 1 = thrown to T2.
+  // Lamp 2 is on exactly when both dual switches are thrown to the same traveler.
+  var S = { sw1:false, p2:0, p3:1, flow:true, xray:true, zoom:0, cMode:'far' };
+  function lamp2On(){ return S.p2 === S.p3; }
+  var btnSw1=document.getElementById('btnSw1'), btnSw2=document.getElementById('btnSw2'), btnSw3=document.getElementById('btnSw3');
+  function lampSet(lamp, on){
+    lamp.bulb.material.color.set(on?0xffe27a:0x9ca3af);
+    lamp.bulb.material.emissive = new THREE.Color(on?0xffc21f:0x000000);
+    lamp.bulb.material.emissiveIntensity = on?0.95:0;
+    lamp.shade.material.color.set(on?0xfff3bf:0xd9d4c5);
+    lamp.light.intensity = on?1.15:0;
+  }
+  function syncUI(){
+    btnSw1.classList.toggle('on', S.sw1);
+    btnSw2.classList.toggle('on', S.p2===1);
+    btnSw3.classList.toggle('on', S.p3===1);
+    document.getElementById('state1').classList.toggle('lit', S.sw1);
+    document.getElementById('stateN').classList.toggle('lit', S.sw1);
+    document.getElementById('state2').classList.toggle('lit', lamp2On());
+    document.getElementById('state1t').textContent = S.sw1 ? '开关 1 合上 · L1′ 带电，灯 1 亮' : '开关 1 断开 · 受控火线 L1′ 无电';
+    document.getElementById('stateNt').textContent = S.sw1 ? '开关 1 合上 · 与灯 1 同时亮' : '开关 1 断开 · 与灯 1 同开同关';
+    document.getElementById('state2t').textContent = '开关 2 掷 T'+(S.p2+1)+' · 开关 3 掷 T'+(S.p3+1)+(lamp2On() ? ' · 同掷向，灯 2 亮' : ' · 掷向不同，灯 2 灭');
+    rocker1.rotation.x = S.sw1 ? -0.18 : 0.18;
+    rocker2.rotation.x = S.p2===1 ? -0.18 : 0.18;
+    rocker3.rotation.x = S.p3===1 ? -0.18 : 0.18;
+    lampSet(lamp1, S.sw1); lampSet(lampNew, S.sw1); lampSet(lamp2, lamp2On());
+  }
+  function flowActive(key){
+    if(!S.flow) return false;
+    if(key==='live'||key==='ret') return true;
+    if(key==='l1') return S.sw1;
+    if(key==='l1r') return S.sw1;
+    if(key==='l2'||key==='l2r') return lamp2On();
+    if(key==='t1') return lamp2On() && S.p2===0;
+    if(key==='t2') return lamp2On() && S.p2===1;
+    return false; // PE: no normal current
+  }
+
+  // ---- wiring diagram panel ----
+  var dTitle=document.getElementById('dTitle'), dStatus=document.getElementById('dStatus'),
+      dEmpty=document.getElementById('dEmpty'),
+      fig1=document.getElementById('fig1'), figLamp=document.getElementById('figLamp'),
+      fig2=document.getElementById('fig2'), fig3=document.getElementById('fig3');
+  function showDiagram(n){
+    var titles = {1:'接线图：开关 1 盒（分线点）', 4:'接线图：灯 1 盒（过线点 · 两灯共用）', 2:'接线图：开关 2 盒（双控 A）', 3:'接线图：开关 3 盒（双控 B · 新增）'};
+    dTitle.textContent = titles[n];
+    var txt, lit;
+    if(n===1){ lit=S.sw1; txt = S.sw1 ? '开关 1 已合上 · 灯 1 与新增灯同亮' : '开关 1 断开 · 灯 1 与新增灯同灭'; }
+    else if(n===4){ lit=S.sw1; txt = S.sw1 ? '开关 1 合上 · L1′ 带电，两灯同亮' : '开关 1 断开 · L1′ 无电，两灯同灭'; }
+    else { lit=lamp2On(); txt = '开关 2 掷 T'+(S.p2+1)+' · 开关 3 掷 T'+(S.p3+1)+(lit ? ' · 同掷向，灯 2 亮' : ' · 掷向不同，灯 2 灭'); }
+    dStatus.textContent = txt; dStatus.classList.toggle('lit', lit);
+    dEmpty.style.display='none';
+    fig1.classList.toggle('show', n===1);
+    figLamp.classList.toggle('show', n===4);
+    fig2.classList.toggle('show', n===2);
+    fig3.classList.toggle('show', n===3);
+  }
+  function toggleSwitch(n){
+    if(n===1) S.sw1=!S.sw1;
+    else if(n===2) S.p2 = S.p2?0:1;
+    else S.p3 = S.p3?0:1;
+    syncUI(); showDiagram(n);
+  }
+  btnSw1.onclick=function(){ toggleSwitch(1); };
+  btnSw2.onclick=function(){ toggleSwitch(2); };
+  btnSw3.onclick=function(){ toggleSwitch(3); };
+  document.getElementById('btnLampFig').onclick=function(){ showDiagram(4); };
+  var btnFlow=document.getElementById('btnFlow');
+  btnFlow.onclick=function(){ S.flow=!S.flow; btnFlow.classList.toggle('on',S.flow); };
+  var btnXray=document.getElementById('btnXray');
+  function applyXray(){
+    M.conduit.opacity = S.xray?0.30:0.9;
+    applyMode();
+  }
+  btnXray.onclick=function(){ S.xray=!S.xray; btnXray.classList.toggle('on',S.xray); applyXray(); };
+
+  var zoomBtns=[document.getElementById('btnZoomBox'), document.getElementById('btnZoomBox2'), document.getElementById('btnZoomBox3')];
+  var swBoxes=[sw1Box, sw2Box, sw3Box];
+  function setZoom(n){
+    S.zoom = (S.zoom===n) ? 0 : n;
+    swBoxes.forEach(function(b, i){
+      var active = S.zoom === i+1;
+      b.plate.visible = !active; b.rocker.visible = !active;
+      b.conns.forEach(function(m){ m.visible = active; });
+      zoomBtns[i].classList.toggle('on', active);
+    });
+    if(S.zoom){
+      var bx = swBoxes[S.zoom-1].x;
+      if(controls) controls.target.set(bx, 1.35, 0);
+      camera.position.set(bx, 1.7, 3.1);
+    } else {
+      if(controls) controls.target.copy(TGT0);
+      camera.position.copy(CAM0);
+    }
+  }
+  zoomBtns.forEach(function(b, i){ b.onclick=function(){ setZoom(i+1); }; });
+
+  // C run: same wall = straight inside the wall; different walls = via the floor
+  var btnCNear=document.getElementById('btnCNear'), btnCFar=document.getElementById('btnCFar');
+  function setCMode(mode){
+    S.cMode = mode;
+    var near = mode==='near';
+    grpCnear.visible = near;
+    grpCfar.visible = !near;
+    refreshModeLabels();
+    btnCNear.classList.toggle('on', near);
+    btnCFar.classList.toggle('on', !near);
+  }
+  if(btnCNear && btnCFar){
+    btnCNear.onclick=function(){ setCMode('near'); };
+    btnCFar.onclick=function(){ setCMode('far'); };
+    setCMode('far');
+  }
+  document.getElementById('btnReset').onclick=function(){
+    if(S.zoom) setZoom(S.zoom);
+    camera.position.copy(CAM0); if(controls) controls.target.copy(TGT0);
+  };
+
+  // click rockers / bulbs in 3D
+  var ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+  canvas.addEventListener('pointerdown', function(e){ mouse.x=(e.offsetX/canvas.clientWidth)*2-1; mouse.y=-(e.offsetY/canvas.clientHeight)*2+1; });
+  canvas.addEventListener('pointerup', function(e){
+    mouse.x=(e.offsetX/canvas.clientWidth)*2-1; mouse.y=-(e.offsetY/canvas.clientHeight)*2+1;
+    ray.setFromCamera(mouse, camera);
+    var hits=ray.intersectObjects([rocker1,rocker2,rocker3,lamp1.bulb,lampNew.bulb,lamp2.bulb]);
+    if(!hits.length) return;
+    var o=hits[0].object;
+    if(o===rocker1||o===lamp1.bulb||o===lampNew.bulb) toggleSwitch(1);
+    else if(o===rocker2||o===lamp2.bulb) toggleSwitch(2);
+    else toggleSwitch(3);
+  });
+
+  function defVisible(fd){
+    return !fd.grp || fd.grp.visible;
+  }
+
+  var clock=new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    var t=clock.getElapsedTime();
+    flowDefs.forEach(function(fd){
+      var active = flowActive(fd.key) && defVisible(fd);
+      fd.dots.forEach(function(d, i){
+        d.visible = active && S.xray;
+        if(!d.visible) return;
+        var u = ((t*0.22) + i*0.25) % 1;
+        var p = fd.curve.getPointAt(u); d.position.copy(p);
+      });
+    });
+    if(controls) controls.update();
+    renderer.render(scene, camera);
+  }
+  syncUI(); applyXray(); animate();
+
+  window.addEventListener('resize', function(){
+    var w=canvas.clientWidth, h=canvas.clientHeight;
+    renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+  });
+})();
+</script>
+</body>
+</html>
